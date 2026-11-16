@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>MFA Token</title>
+<style>
+body{font-family:sans-serif;max-width:400px;margin:40px auto;text-align:center}
+#otp{font-size:48px;letter-spacing:6px;margin:20px}
+button,input{font-size:18px;padding:8px 14px;margin:4px}
+</style></head><body>
+<h2>Virtual MFA Token</h2>
+<button onclick="gen()">Generate OTP</button>
+<div id="otp">------</div>
+<div id="exp"></div>
+<input id="code" placeholder="Enter OTP" maxlength="6">
+<button onclick="ver()">Verify</button>
+<h3 id="res"></h3>
+<script>
+const API = "https://nj3k1tpawe.execute-api.us-east-1.amazonaws.com";
+async function gen(){
+  const r = await (await fetch(API + "/token")).json();
+  document.getElementById("otp").textContent = r.otp;
+  document.getElementById("exp").textContent = "Valid for ~" + r.expires_in + "s";
+  document.getElementById("code").value = r.otp;
+}
+async function ver(){
+  const r = await (await fetch(API + "/verify", {method:"POST",
+    body: JSON.stringify({otp: document.getElementById("code").value})})).json();
+  const e = document.getElementById("res");
+  e.textContent = r.verified ? "VERIFIED" : "DENIED";
+  e.style.color = r.verified ? "green" : "red";
+}
+</script></body></html>
